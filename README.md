@@ -91,7 +91,32 @@ This uploads:
 - `README.md`
 - the `src/` package
 
-### 4. Run a remote experiment
+### 4. Prepare the sandbox workspace
+
+```bash
+scripts/prime/prepare_workspace.sh <sandbox-id>
+```
+
+This creates the expected directories inside the sandbox:
+- `/workspace/data/videos`
+- `/workspace/outputs`
+- `/workspace/logs`
+
+### 5. Upload a test video
+
+```bash
+scripts/prime/upload_video.sh <sandbox-id> <local-video-path> [category]
+```
+
+Example:
+
+```bash
+scripts/prime/upload_video.sh sbx_123 ./local-test-video.mp4 tranquil
+```
+
+The script prints the remote path you should use for `run_experiment.sh`.
+
+### 6. Run a remote experiment
 
 ```bash
 scripts/prime/run_experiment.sh <sandbox-id> <remote-video-path> "<prompt>" <remote-output-path> [extra args...]
@@ -108,7 +133,7 @@ scripts/prime/run_experiment.sh sbx_123 \
   --video-backend decord
 ```
 
-### 5. Download the outputs
+### 7. Download the outputs
 
 ```bash
 scripts/prime/download_outputs.sh <sandbox-id> <remote-output-path> <local-output-path>
@@ -122,8 +147,27 @@ scripts/prime/download_outputs.sh sbx_123 \
   outputs/example.json
 ```
 
+### End-to-end smoke test
+
+Once your Docker image is available to Prime, the shortest full-path smoke test is:
+
+```bash
+scripts/prime/create_sandbox.sh <docker-image> qwen-video-smoke-test
+scripts/prime/upload_project.sh <sandbox-id>
+scripts/prime/prepare_workspace.sh <sandbox-id>
+scripts/prime/upload_video.sh <sandbox-id> ./local-test-video.mp4 tranquil
+scripts/prime/run_experiment.sh <sandbox-id> \
+  /workspace/data/videos/tranquil/local-test-video.mp4 \
+  "Describe the scene, motion level, visibility, and likely obstacles." \
+  /workspace/outputs/smoke_test.json \
+  --model Qwen/Qwen3.5-4B \
+  --video-backend decord
+scripts/prime/download_outputs.sh <sandbox-id> \
+  /workspace/outputs/smoke_test.json \
+  outputs/smoke_test.json
+```
+
 ### Current limitations
 
-- The helper scripts assume the video file already exists inside the sandbox.
-- We have not yet added a helper for uploading videos or bulk datasets.
 - We have not yet validated the final Qwen3.5 checkpoint API against a live GPU run.
+- We have not yet added bulk dataset upload helpers.
