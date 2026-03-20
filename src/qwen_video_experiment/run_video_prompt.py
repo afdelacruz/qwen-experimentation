@@ -78,7 +78,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--video-backend",
-        default="decord",
+        default="pyav",
         help="Video loading backend used by Transformers.",
     )
     parser.add_argument(
