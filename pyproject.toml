@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qwen-video-experiment"
+version = "0.1.0"
+description = "Video analysis experiments with Qwen multimodal models."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "accelerate>=1.11.0",
+  "decord>=0.6.0",
+  "safetensors>=0.5.0",
+  "torch>=2.5.0",
+  "transformers>=5.1.0",
+]
+
+[project.scripts]
+qwen-video-run = "qwen_video_experiment.run_video_prompt:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
