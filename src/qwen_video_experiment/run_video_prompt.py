@@ -18,6 +18,7 @@ class RunConfig:
     prompt: str
     output: str
     system_prompt: str | None
+    fps: float | None
     num_frames: int | None
     max_new_tokens: int
     temperature: float
@@ -47,7 +48,14 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional system prompt to steer analysis style.",
     )
-    parser.add_argument(
+    sampling_group = parser.add_mutually_exclusive_group()
+    sampling_group.add_argument(
+        "--fps",
+        type=float,
+        default=1.0,
+        help="Sample video frames at this FPS. Use instead of --num-frames.",
+    )
+    sampling_group.add_argument(
         "--num-frames",
         type=int,
         default=None,
@@ -183,6 +191,8 @@ def run_inference(config: RunConfig) -> dict[str, Any]:
         "return_dict": True,
         "return_tensors": "pt",
     }
+    if config.fps is not None:
+        processor_kwargs["fps"] = config.fps
     if config.num_frames is not None:
         processor_kwargs["num_frames"] = config.num_frames
 
@@ -215,6 +225,7 @@ def run_inference(config: RunConfig) -> dict[str, Any]:
         "prompt": config.prompt,
         "system_prompt": config.system_prompt,
         "generation": {
+            "fps": config.fps,
             "num_frames": config.num_frames,
             "max_new_tokens": config.max_new_tokens,
             "do_sample": config.do_sample,
@@ -241,6 +252,7 @@ def main() -> None:
         prompt=args.prompt,
         output=args.output,
         system_prompt=args.system_prompt,
+        fps=args.fps,
         num_frames=args.num_frames,
         max_new_tokens=args.max_new_tokens,
         temperature=args.temperature,

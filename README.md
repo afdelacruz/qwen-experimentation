@@ -14,6 +14,12 @@ source .venv/bin/activate
 uv pip install --python .venv/bin/python -e ".[local]"
 ```
 
+For `Qwen3.5` video runs, use the newer Transformers build we validated on the pod:
+
+```bash
+uv pip install --python .venv/bin/python --upgrade "git+https://github.com/huggingface/transformers"
+```
+
 ## Single Video Run
 
 The first runner accepts a local video path and a prompt at runtime, then writes a JSON result file.
@@ -23,6 +29,7 @@ qwen-video-run \
   --model Qwen/Qwen3.5-4B \
   --video data/videos/tranquil/example.mp4 \
   --prompt "Describe the scene, motion level, visibility, and likely obstacles." \
+  --fps 1 \
   --output outputs/example.json
 ```
 
@@ -33,6 +40,7 @@ python -m qwen_video_experiment.run_video_prompt \
   --model Qwen/Qwen3.5-4B \
   --video data/videos/tranquil/example.mp4 \
   --prompt "Describe the scene, motion level, visibility, and likely obstacles." \
+  --fps 1 \
   --output outputs/example.json
 ```
 
@@ -42,6 +50,7 @@ python -m qwen_video_experiment.run_video_prompt \
 - The runner expects a model compatible with `AutoModelForImageTextToText`.
 - Local installs use the `pyav` backend by default.
 - Linux/GPU environments can install `.[remote]`; Qwen3.5 may still ignore backend selection and use its own video path.
+- For Qwen3.5 video, `--fps` is the default sampling control. Only use `--num-frames` if you intentionally want fixed-count sampling.
 - Heavy inference should be run on Prime GPUs rather than the local M1 machine.
 
 ## Prime Sandbox Workflow
