@@ -50,8 +50,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--num-frames",
         type=int,
-        default=16,
-        help="Uniformly sample this many frames from the input video.",
+        default=None,
+        help="Optional fixed number of frames to sample from the input video.",
     )
     parser.add_argument(
         "--max-new-tokens",
@@ -177,15 +177,16 @@ def run_inference(config: RunConfig) -> dict[str, Any]:
     started = time.time()
     processor, model = load_model_stack(config)
     messages = build_messages(config, video_path)
-    inputs = processor.apply_chat_template(
-        messages,
-        add_generation_prompt=True,
-        tokenize=True,
-        return_dict=True,
-        return_tensors="pt",
-        num_frames=config.num_frames,
-        video_load_backend=config.video_backend,
-    )
+    processor_kwargs: dict[str, Any] = {
+        "add_generation_prompt": True,
+        "tokenize": True,
+        "return_dict": True,
+        "return_tensors": "pt",
+    }
+    if config.num_frames is not None:
+        processor_kwargs["num_frames"] = config.num_frames
+
+    inputs = processor.apply_chat_template(messages, **processor_kwargs)
     model_inputs = move_inputs_to_model(inputs, model)
 
     generation_kwargs: dict[str, Any] = {

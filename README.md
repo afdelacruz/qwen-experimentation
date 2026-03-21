@@ -41,7 +41,7 @@ python -m qwen_video_experiment.run_video_prompt \
 - This initial version targets the Transformers multimodal chat-template path.
 - The runner expects a model compatible with `AutoModelForImageTextToText`.
 - Local installs use the `pyav` backend by default.
-- Linux/GPU environments can install `.[remote]` to use `decord`.
+- Linux/GPU environments can install `.[remote]`; Qwen3.5 may still ignore backend selection and use its own video path.
 - Heavy inference should be run on Prime GPUs rather than the local M1 machine.
 
 ## Prime Sandbox Workflow

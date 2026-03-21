@@ -10,8 +10,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "accelerate>=1.11.0",
+  "protobuf>=5.0.0",
   "safetensors>=0.5.0",
   "torch>=2.5.0",
+  "torchvision>=0.20.0",
   "transformers>=5.1.0",
 ]
 
@@ -20,6 +22,7 @@ local = [
   "av>=14.0.0",
 ]
 remote = [
+  "av>=14.0.0",
   "decord>=0.6.0",
 ]
 
