@@ -53,6 +53,107 @@ python -m qwen_video_experiment.run_video_prompt \
 - For Qwen3.5 video, `--fps` is the default sampling control. Only use `--num-frames` if you intentionally want fixed-count sampling.
 - Heavy inference should be run on Prime GPUs rather than the local M1 machine.
 
+## Prime Pods Workflow
+
+For the current project state, Prime pods are the smoothest path for live Qwen3.5 runs.
+
+### 1. Recommend a pod
+
+Use the recommender to rank currently available single-GPU options:
+
+```bash
+python scripts/prime/recommend_pod.py
+```
+
+Current preference order:
+- `L4 24GB`
+- `A5000 24GB`
+- `RTX4090 24GB`
+- `A40 48GB`
+- `A6000 48GB`
+
+The script prints:
+- the best current pod candidate
+- fallback candidates
+- the suggested `prime pods create --id ...` command
+- the recommended image and disk settings
+
+### 2. Create the pod
+
+Create the recommended pod interactively:
+
+```bash
+prime pods create --id <recommended-id>
+```
+
+Recommended interactive choices:
+- image: `cuda_12_4_pytorch_2_4`
+- disk: `120 GB`
+
+### 3. Bootstrap the pod from your laptop
+
+Once the pod is active and you have the SSH host and port, run:
+
+```bash
+scripts/prime/bootstrap_pod.sh <host> <port>
+```
+
+Example:
+
+```bash
+scripts/prime/bootstrap_pod.sh 157.157.221.29 43438
+```
+
+That wrapper will:
+- clone or update the public GitHub repo on the pod
+- create `.venv`
+- install `.[remote]`
+- upgrade Transformers from GitHub
+- create `outputs/`, `logs/`, and `data/videos/`
+
+### 4. Optional: pass HF auth during bootstrap
+
+If you export `HF_TOKEN` locally before running the bootstrap script:
+
+```bash
+export HF_TOKEN=hf_your_read_token
+scripts/prime/bootstrap_pod.sh <host> <port>
+```
+
+the script will store it on the pod in:
+
+```bash
+~/.config/qwen-video-experiment.env
+```
+
+with file mode `600`, and source it from `.bashrc`.
+
+### 5. Connect and run experiments
+
+```bash
+ssh root@<host> -p <port>
+cd ~/qwen-experimentation
+source .venv/bin/activate
+```
+
+Then run:
+
+```bash
+qwen-video-run \
+  --model Qwen/Qwen3.5-4B \
+  --video runtime-smoke-snow-clean.mp4 \
+  --prompt "Describe the scene, motion level, visibility, and likely obstacles." \
+  --fps 1 \
+  --output outputs/smoke_test.json
+```
+
+### Current pod caveats
+
+- `Qwen3.5` video currently works best with the newer Transformers GitHub build.
+- Some source videos may need to be re-encoded to a simpler MP4 before inference.
+- First-run model download is large and can take several minutes on a fresh pod.
+- Rotate `HF_TOKEN` if it is ever pasted into a terminal transcript or chat.
+
 ## Prime Sandbox Workflow
 
 The repo now includes a first-pass sandbox workflow for GPU execution.
